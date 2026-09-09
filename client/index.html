@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER-STRIKE 3D // Server-Authoritative FPS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0c10;
+      --neon-cyan: #00f0ff;
+      --neon-red: #ff0055;
+      --neon-amber: #ffaa00;
+      --neon-green: #00ff66;
+      --glass-bg: rgba(12, 16, 24, 0.75);
+      --glass-border: rgba(0, 240, 255, 0.2);
+      --font-header: 'Orbitron', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      font-family: var(--font-body);
+      color: #fff;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Start Overlay */
+    #click-to-play {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: radial-gradient(circle at center, rgba(10, 12, 18, 0.85) 0%, rgba(5, 6, 9, 0.98) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    #click-to-play.hidden {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    #click-to-play h1 {
+      font-family: var(--font-header);
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      margin-bottom: 0.5rem;
+    }
+
+    #click-to-play p.subtitle {
+      font-size: 1.25rem;
+      color: var(--neon-cyan);
+      letter-spacing: 2px;
+      margin-bottom: 2rem;
+    }
+
+    .start-btn {
+      padding: 16px 40px;
+      font-family: var(--font-header);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), #00a8ff);
+      border: none;
+      border-radius: 4px;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 45px rgba(0, 240, 255, 0.8);
+    }
+
+    .controls-hint {
+      margin-top: 2.5rem;
+      display: flex;
+      gap: 24px;
+      color: #8899ac;
+      font-size: 1rem;
+    }
+
+    .controls-hint span {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    /* HUD Interface */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+    }
+
+    /* Crosshair */
+    #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+    }
+
+    #crosshair .dot {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 4px;
+      height: 4px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    #crosshair .line {
+      position: absolute;
+      background: rgba(0, 240, 255, 0.85);
+      box-shadow: 0 0 6px var(--neon-cyan);
+    }
+
+    #crosshair .line.top { top: 0; left: 11px; width: 2px; height: 6px; }
+    #crosshair .line.bottom { bottom: 0; left: 11px; width: 2px; height: 6px; }
+    #crosshair .line.left { top: 11px; left: 0; width: 6px; height: 2px; }
+    #crosshair .line.right { top: 11px; right: 0; width: 6px; height: 2px; }
+
+    /* Hitmarker Overlay */
+    #hitmarker {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 32px;
+      height: 32px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.05s ease-out, transform 0.05s ease-out;
+    }
+
+    #hitmarker.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    #hitmarker .hit-line {
+      position: absolute;
+      width: 10px;
+      height: 2px;
+      background: var(--neon-red);
+      box-shadow: 0 0 8px var(--neon-red);
+    }
+
+    #hitmarker .hit-line.tl { top: 4px; left: 4px; transform: rotate(45deg); }
+    #hitmarker .hit-line.tr { top: 4px; right: 4px; transform: rotate(-45deg); }
+    #hitmarker .hit-line.bl { bottom: 4px; left: 4px; transform: rotate(-45deg); }
+    #hitmarker .hit-line.br { bottom: 4px; right: 4px; transform: rotate(45deg); }
+
+    /* HUD Top Bar */
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .match-info {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 12px 24px;
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      font-family: var(--font-header);
+    }
+
+    .score-red { color: var(--neon-red); font-size: 1.5rem; font-weight: 700; }
+    .score-blue { color: var(--neon-cyan); font-size: 1.5rem; font-weight: 700; }
+    .match-timer { font-size: 1.25rem; color: #fff; letter-spacing: 1px; }
+
+    /* Diagnostics Panel */
+    #net-diagnostics {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 12px 16px;
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      font-size: 0.85rem;
+      color: #90a0b5;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    #net-diagnostics .stat-val {
+      color: var(--neon-cyan);
+      font-weight: 700;
+    }
+
+    /* HUD Bottom Bar */
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .player-stats {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 16px 24px;
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 280px;
+    }
+
+    .bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #c0d0e5;
+    }
+
+    .bar-outer {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-inner.hp {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff0055, #ff4400);
+      box-shadow: 0 0 10px rgba(255, 0, 85, 0.6);
+      transition: width 0.2s ease;
+    }
+
+    .bar-inner.armor {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #00f0ff, #0088ff);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+      transition: width 0.2s ease;
+    }
+
+    .weapon-stats {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 16px 28px;
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .weapon-name {
+      font-family: var(--font-header);
+      font-size: 1.1rem;
+      color: var(--neon-cyan);
+      letter-spacing: 1px;
+    }
+
+    .ammo-count {
+      font-family: var(--font-header);
+      font-size: 2.75rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    }
+
+    .ammo-max {
+      font-size: 1.2rem;
+      color: #708095;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Start & Pause Overlay -->
+  <div id="click-to-play">
+    <h1>CYBER-STRIKE 3D</h1>
+    <p class="subtitle">SERVER-AUTHORITATIVE FPS ENGINE</p>
+    <button class="start-btn" id="start-btn">DEPLOY TO ARENA</button>
+    <div class="controls-hint">
+      <div><span>W A S D</span> Move</div>
+      <div><span>SPACE</span> Jump</div>
+      <div><span>C</span> Crouch / Slide</div>
+      <div><span>SHIFT</span> Sprint</div>
+      <div><span>L-CLICK</span> Fire</div>
+      <div><span>R-CLICK</span> ADS</div>
+      <div><span>R</span> Reload</div>
+      <div><span>1 - 5</span> Weapon Select</div>
+    </div>
+  </div>
+
+  <!-- In-game HUD -->
+  <div id="hud">
+    <!-- Top Bar -->
+    <div class="hud-top">
+      <div class="match-info">
+        <span class="score-red" id="score-red">0</span>
+        <span class="match-timer" id="match-timer">10:00</span>
+        <span class="score-blue" id="score-blue">0</span>
+      </div>
+
+      <!-- Tactical Minimap Radar -->
+      <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 6px; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <canvas id="minimap-canvas" width="130" height="130" style="border-radius: 6px; background: #070a12;"></canvas>
+        <span style="font-family: var(--font-header); font-size: 0.65rem; color: var(--neon-cyan); letter-spacing: 2px;">TACTICAL RADAR</span>
+      </div>
+
+      <div id="net-diagnostics">
+        <div>FPS: <span class="stat-val" id="diag-fps">60</span></div>
+        <div>Ping: <span class="stat-val" id="diag-ping">0 ms</span></div>
+        <div>Server Tick: <span class="stat-val" id="diag-tick">60 Hz</span></div>
+        <div>Pred Error: <span class="stat-val" id="diag-err">0.00 m</span></div>
+      </div>
+    </div>
+
+    <!-- Multi-Kill Announcer Banner -->
+    <div id="announcer-banner" style="position: absolute; top: 24%; left: 50%; transform: translate(-50%, -50%) scale(0.8); font-family: var(--font-header); font-size: 2.2rem; font-weight: 900; color: #ff0055; letter-spacing: 4px; text-shadow: 0 0 25px #ff0055; opacity: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;">
+      DOUBLE KILL!
+    </div>
+
+    <!-- Slide & Dash Status Indicators -->
+    <div id="slide-indicator" style="position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); font-family: var(--font-header); font-size: 0.9rem; font-weight: 700; color: #00f0ff; letter-spacing: 3px; text-shadow: 0 0 10px #00f0ff; opacity: 0; transition: opacity 0.15s ease; pointer-events: none;">
+      ⚡ SLIDING ⚡
+    </div>
+
+    <!-- Center Crosshair & Hitmarker -->
+    <div id="crosshair">
+      <div class="dot"></div>
+      <div class="line top"></div>
+      <div class="line bottom"></div>
+      <div class="line left"></div>
+      <div class="line right"></div>
+    </div>
+
+    <div id="hitmarker">
+      <div class="hit-line tl"></div>
+      <div class="hit-line tr"></div>
+      <div class="hit-line bl"></div>
+      <div class="hit-line br"></div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="hud-bottom">
+      <div class="player-stats">
+        <div class="bar-wrapper">
+          <div class="bar-label"><span>HEALTH</span><span id="hp-val">100 HP</span></div>
+          <div class="bar-outer"><div class="bar-inner hp" id="hp-bar"></div></div>
+        </div>
+        <div class="bar-wrapper">
+          <div class="bar-label"><span>ARMOR</span><span id="armor-val">100 AP</span></div>
+          <div class="bar-outer"><div class="bar-inner armor" id="armor-bar"></div></div>
+        </div>
+      </div>
+
+      <div class="weapon-stats">
+        <div class="weapon-name" id="weapon-name">VFX-44 ASSAULT RIFLE</div>
+        <div class="ammo-display">
+          <span class="ammo-count" id="ammo-current">30</span>
+          <span class="ammo-max" id="ammo-max">/ 30</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Damage & Respawn Overlays -->
+  <div id="damage-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, transparent 35%, rgba(255, 0, 85, 0.55) 100%); opacity: 0; transition: opacity 0.12s ease-out; z-index: 50;"></div>
+
+  <div id="respawn-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(30, 0, 12, 0.95) 0%, rgba(10, 0, 5, 0.98) 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(8px);">
+    <h1 style="font-family: var(--font-header); font-size: 3.5rem; color: #ff0055; letter-spacing: 6px; text-shadow: 0 0 30px #ff0055; margin-bottom: 0.5rem;">ELIMINATED BY ENEMY AI</h1>
+    <p id="respawn-timer-text" style="font-family: var(--font-header); font-size: 1.4rem; color: #00f0ff; letter-spacing: 2px;">RESPAWNING IN ARENA...</p>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
