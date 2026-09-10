@@ -47,17 +47,17 @@ export const TEST_MAP: MapDefinition = {
   },
   floorSize: { width: 160, length: 160 },
   spawnPoints: [
-    { id: "center_spawn", position: { x: 0,   y: 1.0, z: -25 }, yaw: 0,     team: "neutral" },
-    { id: "red_1",     position: { x: -55, y: 1.0, z: -55 }, yaw: 0.78,  team: "red" },
-    { id: "red_2",     position: { x: -60, y: 1.0, z: -45 }, yaw: 0.78,  team: "red" },
-    { id: "red_3",     position: { x: -45, y: 1.0, z: -60 }, yaw: 0.78,  team: "red" },
-    { id: "blue_1",    position: { x: 55,  y: 1.0, z: 55 },  yaw: -2.35, team: "blue" },
-    { id: "blue_2",    position: { x: 60,  y: 1.0, z: 45 },  yaw: -2.35, team: "blue" },
-    { id: "blue_3",    position: { x: 45,  y: 1.0, z: 60 },  yaw: -2.35, team: "blue" },
-    { id: "neutral_1", position: { x: 0,   y: 1.0, z: -65 }, yaw: 0,     team: "neutral" },
-    { id: "neutral_2", position: { x: 0,   y: 1.0, z: 65 },  yaw: 3.14,  team: "neutral" },
-    { id: "neutral_3", position: { x: -65, y: 1.0, z: 0 },   yaw: 1.57,  team: "neutral" },
-    { id: "neutral_4", position: { x: 65,  y: 1.0, z: 0 },   yaw: -1.57, team: "neutral" }
+    { id: "center_spawn", position: { x: 0,   y: 0.0, z: -25 }, yaw: 0,     team: "neutral" },
+    { id: "red_1",     position: { x: -55, y: 0.0, z: -55 }, yaw: 0.78,  team: "red" },
+    { id: "red_2",     position: { x: -60, y: 0.0, z: -45 }, yaw: 0.78,  team: "red" },
+    { id: "red_3",     position: { x: -45, y: 0.0, z: -60 }, yaw: 0.78,  team: "red" },
+    { id: "blue_1",    position: { x: 55,  y: 0.0, z: 55 },  yaw: -2.35, team: "blue" },
+    { id: "blue_2",    position: { x: 60,  y: 0.0, z: 45 },  yaw: -2.35, team: "blue" },
+    { id: "blue_3",    position: { x: 45,  y: 0.0, z: 60 },  yaw: -2.35, team: "blue" },
+    { id: "neutral_1", position: { x: 0,   y: 0.0, z: -65 }, yaw: 0,     team: "neutral" },
+    { id: "neutral_2", position: { x: 0,   y: 0.0, z: 65 },  yaw: 3.14,  team: "neutral" },
+    { id: "neutral_3", position: { x: -65, y: 0.0, z: 0 },   yaw: 1.57,  team: "neutral" },
+    { id: "neutral_4", position: { x: 65,  y: 0.0, z: 0 },   yaw: -1.57, team: "neutral" }
   ],
   jumpPads: [
     { id: "jp_center_n", position: { x: 0,   y: 0.1, z: -18 }, boostY: 19.5 },

@@ -18,7 +18,7 @@ const SLIDE_DURATION  = 0.75; // seconds
 const SLIDE_MIN_SPEED = 2.5;  // below this cancel slide
 
 export class MovementController {
-  public position: Vector3Data = { x: 0, y: 1.0, z: 0 };
+  public position: Vector3Data = { x: 0, y: 0.0, z: 0 };
   public velocity: Vector3Data = { x: 0, y: 0, z: 0 };
   public isGrounded: boolean = false;
   public isCrouching: boolean = false;
@@ -224,7 +224,7 @@ export class MovementController {
           this.isGrounded = false;
         } else {
           const blockedDown = desired.y < -0.001 && Math.abs(corrected.y - desired.y) > 0.0001;
-          this.isGrounded   = blockedDown || (this.position.y <= 1.05);
+          this.isGrounded   = blockedDown || (this.position.y <= 0.05);
         }
 
         this.position.x += corrected.x;
@@ -232,8 +232,8 @@ export class MovementController {
         this.position.z += corrected.z;
 
         // Strict floor height safety clamp so player NEVER sinks down below floor level!
-        if (this.position.y < 1.0) {
-          this.position.y = 1.0;
+        if (this.position.y < 0.0) {
+          this.position.y = 0.0;
           this.isGrounded = true;
           if (this.velocity.y < 0) this.velocity.y = 0;
         }
@@ -245,8 +245,8 @@ export class MovementController {
         this.position.y += desired.y;
         this.position.z += desired.z;
 
-        if (this.position.y <= 1.0) {
-          this.position.y = 1.0;
+        if (this.position.y <= 0.0) {
+          this.position.y = 0.0;
           this.isGrounded = true;
           if (this.velocity.y < 0) this.velocity.y = 0;
         }
